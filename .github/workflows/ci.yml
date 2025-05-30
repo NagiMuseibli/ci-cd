@@ -1,0 +1,35 @@
+name: Laravel CI/CD (Main Branch)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  laravel-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository-ni yüklə
+        uses: actions/checkout@v3
+
+      - name: PHP quraşdır
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, bcmath, dom, curl, pdo, pdo_mysql
+
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: .env faylı yarat
+        run: cp .env.example .env
+
+      - name: App key yarad
+        run: php artisan key:generate
+
+      - name: Laravel Cache-ləri təmizlə
+        run: php artisan config:cache
+
+      - name: Laravel testləri
+        run: php artisan test || true

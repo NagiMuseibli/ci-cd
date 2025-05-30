@@ -1,0 +1,30 @@
+name: Deploy Laravel to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodun checkout-u
+        uses: actions/checkout@v3
+
+      - name: SSH ilə serverə qoşulub deploy etmək
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.PRIVATE_SECRET_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            cd /var/www/your-laravel-project   # serverdə layihənin yolu
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
